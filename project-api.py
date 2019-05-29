@@ -5,16 +5,26 @@ projects = [
     "id": 1,
     "state": "In progress",
     "tasks": [
-            {"task 1": "Description task 1"},
-            {"task 2": "Description task 2"}
+            {"taskName": "Name",
+            "id": 1,
+            "description": "Description task 1"},
+
+            {"taskName": "Name 2",
+            "id": 2,
+            "description": "Description task 2"}
             ]
     },
 
     {"ProjectName": "Second Project",
     "id": 2,"state": "In progress",
     "tasks": [
-            {"task 1": "Description task 1"},
-            {"task 2": "Description task 2"}
+            {"taskName": "Name",
+            "id": 1,
+            "description": "Description task 1"},
+
+            {"taskName": "Name 2",
+            "id": 2,
+            "description": "Description task 2"}
             ]
     },
 
@@ -22,8 +32,13 @@ projects = [
     "id": 3,
     "state": "In progress",
     "tasks": [
-            {"task 1": "Description task 1"},
-            {"task 2": "Description task 2"}
+            {"taskName": "Name",
+            "id": 1,
+            "description": "Description task 1"},
+
+            {"taskName": "Name 2",
+            "id": 2,
+            "description": "Description task 2"}
             ]
     }
 ]
@@ -84,12 +99,29 @@ def put_project(id):
             return jsonify({"Project modified": project})
     abort(404)
 
+@app.route("/projects/tasks", methods=["GET"])
+def get_all_tasks():
+    all_tasks = []
+    for project in projects:
+        all_tasks.append({project["ProjectName"]: project["tasks"]})
+    return jsonify(all_tasks)
+
 @app.route("/projects/<int:id>/tasks", methods=["GET"])
 def get_tasks_from_a_project(id):
     for project in projects:
         if project["id"] == id:
             return jsonify({project["ProjectName"]: project["tasks"]})
     abort(404)
+
+@app.route("/projects/<int:id>/tasks", methods=["POST"])
+def post_task(id):
+    for project in projects:
+        if project["id"] == id:
+            taskName = request.json.get("taskName")
+            id = project["tasks"][-1].get("id") + 1
+            description = request.json.get("description")
+            project["tasks"].append({"taskName": taskName, "id": id, "description": description})
+            return jsonify({project["ProjectName"]: project["tasks"]})
 
 if __name__ == "__main__":
     app.run(debug=True)
