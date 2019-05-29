@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, abort, make_response
+from flask import Flask, jsonify, abort, make_response, request
 
 projects = [
     {"ProjectName": "First Project",
@@ -38,6 +38,14 @@ def delete_project(id):
             projects.remove(project)
             return jsonify({"Project state": "Deleted"})
     abort(404)
+
+@app.route("/projects", methods=["POST"])
+def post_project():
+    ProjectName = request.json.get("ProjectName")
+    id = projects[-1].get("id") + 1
+
+    projects.append({"ProjectName": ProjectName, "id": id})
+    return jsonify({"ProjectName": ProjectName, "id": id})
 
 if __name__ == "__main__":
     app.run(debug=True)
