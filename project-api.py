@@ -31,5 +31,13 @@ def get_one_project(id):
 def not_found(error):
     return make_response(jsonify({"Project": "Not Found"}), 404)
 
+@app.route("/projects/<int:id>", methods=["DELETE"])
+def delete_project(id):
+    for project in projects:
+        if project["id"] == id:
+            projects.remove(project)
+            return jsonify({"Project state": "Deleted"})
+    abort(404)
+
 if __name__ == "__main__":
     app.run(debug=True)
