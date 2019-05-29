@@ -2,11 +2,18 @@ from flask import Flask, jsonify, abort, make_response, request
 
 projects = [
     {"ProjectName": "First Project",
-    "id": 1},
+    "id": 1,
+    "state": "In progress",
+    "task": "A task description"},
+
     {"ProjectName": "Second Project",
-    "id": 2},
+    "id": 2,"state": "In progress",
+    "task": "A task description"},
+
     {"ProjectName": "Third Project",
-    "id": 3}
+    "id": 3,
+    "state": "In progress",
+    "task": "A task description"}
 ]
 
 app = Flask(__name__)
@@ -45,9 +52,11 @@ def post_project():
         abort(400)
     ProjectName = request.json.get("ProjectName")
     id = projects[-1].get("id") + 1
+    state = "In progress"
+    task = request.json.get("task", "You need to add a task in this project.")
 
-    projects.append({"ProjectName": ProjectName, "id": id})
-    return jsonify({"ProjectName": ProjectName, "id": id})
+    projects.append({"ProjectName": ProjectName, "id": id, "state": state, "task": task})
+    return jsonify({"ProjectName": ProjectName, "id": id, "state": state, "task": task})
 
 @app.errorhandler(400)
 def bad_request(error):
@@ -57,8 +66,9 @@ def bad_request(error):
 def put_project(id):
     for project in projects:
         if project["id"] == id:
-            print(project["ProjectName"])
-            project["ProjectName"] = request.json.get("ProjectName")
+            project["ProjectName"] = request.json.get("ProjectName", project["ProjectName"])
+            project["state"] = request.json.get("state", project["state"])
+            project["task"] = request.json.get("task", project["task"])
             return jsonify({"Project modified": project})
     abort(404)
 
