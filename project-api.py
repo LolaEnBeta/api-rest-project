@@ -53,5 +53,14 @@ def post_project():
 def bad_request(error):
     return make_response(jsonify("You need to name the project."), 400)
 
+@app.route("/projects/<int:id>", methods=["PUT"])
+def put_project(id):
+    for project in projects:
+        if project["id"] == id:
+            print(project["ProjectName"])
+            project["ProjectName"] = request.json.get("ProjectName")
+            return jsonify({"Project modified": project})
+    abort(404)
+
 if __name__ == "__main__":
     app.run(debug=True)
