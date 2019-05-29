@@ -4,16 +4,28 @@ projects = [
     {"ProjectName": "First Project",
     "id": 1,
     "state": "In progress",
-    "task": "A task description"},
+    "tasks": [
+            {"task 1": "Description task 1"},
+            {"task 2": "Description task 2"}
+            ]
+    },
 
     {"ProjectName": "Second Project",
     "id": 2,"state": "In progress",
-    "task": "A task description"},
+    "tasks": [
+            {"task 1": "Description task 1"},
+            {"task 2": "Description task 2"}
+            ]
+    },
 
     {"ProjectName": "Third Project",
     "id": 3,
     "state": "In progress",
-    "task": "A task description"}
+    "tasks": [
+            {"task 1": "Description task 1"},
+            {"task 2": "Description task 2"}
+            ]
+    }
 ]
 
 app = Flask(__name__)
@@ -53,10 +65,10 @@ def post_project():
     ProjectName = request.json.get("ProjectName")
     id = projects[-1].get("id") + 1
     state = "In progress"
-    task = request.json.get("task", "You need to add a task in this project.")
+    tasks = "You need to add a task in this project."
 
-    projects.append({"ProjectName": ProjectName, "id": id, "state": state, "task": task})
-    return jsonify({"ProjectName": ProjectName, "id": id, "state": state, "task": task})
+    projects.append({"ProjectName": ProjectName, "id": id, "state": state, "tasks": tasks})
+    return jsonify({"ProjectName": ProjectName, "id": id, "state": state, "tasks": tasks})
 
 @app.errorhandler(400)
 def bad_request(error):
@@ -68,8 +80,15 @@ def put_project(id):
         if project["id"] == id:
             project["ProjectName"] = request.json.get("ProjectName", project["ProjectName"])
             project["state"] = request.json.get("state", project["state"])
-            project["task"] = request.json.get("task", project["task"])
+            project["tasks"] = request.json.get("tasks", project["tasks"])
             return jsonify({"Project modified": project})
+    abort(404)
+
+@app.route("/projects/<int:id>/tasks", methods=["GET"])
+def get_tasks_from_a_project(id):
+    for project in projects:
+        if project["id"] == id:
+            return jsonify({project["ProjectName"]: project["tasks"]})
     abort(404)
 
 if __name__ == "__main__":
