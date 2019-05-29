@@ -41,11 +41,17 @@ def delete_project(id):
 
 @app.route("/projects", methods=["POST"])
 def post_project():
+    if not request.json or not "ProjectName" in request.json:
+        abort(400)
     ProjectName = request.json.get("ProjectName")
     id = projects[-1].get("id") + 1
 
     projects.append({"ProjectName": ProjectName, "id": id})
     return jsonify({"ProjectName": ProjectName, "id": id})
+
+@app.errorhandler(400)
+def bad_request(error):
+    return make_response(jsonify("You need to name the project."), 400)
 
 if __name__ == "__main__":
     app.run(debug=True)
