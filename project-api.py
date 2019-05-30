@@ -10,12 +10,12 @@ projects = [
         "tasks": [
             {
                 "task_name": "Name",
-                "id": 1,
+                "task_id": 1,
                 "description": "Description task 1"
             },
             {
                 "task_name": "Name 2",
-                "id": 2,
+                "task_id": 2,
                 "description": "Description task 2"
             }
         ]
@@ -27,12 +27,12 @@ projects = [
         "tasks": [
             {
                 "task_name": "Name",
-                "id": 1,
+                "task_id": 1,
                 "description": "Description task 1"
             },
             {
                 "task_name": "Name 2",
-                "id": 2,
+                "task_id": 2,
                 "description": "Description task 2"
             }
         ]
@@ -44,12 +44,12 @@ projects = [
         "tasks": [
             {
                 "task_name": "Name",
-                "id": 1,
+                "task_id": 1,
                 "description": "Description task 1"
             },
             {
                 "task_name": "Name 2",
-                "id": 2,
+                "task_id": 2,
                 "description": "Description task 2"
             }
         ]
@@ -87,7 +87,7 @@ def delete_project(id):
 
 @app.route("/projects", methods=["POST"])
 def create_project():
-    if not request.json or not "ProjectName" in request.json:
+    if not request.json or not "project_name" in request.json:
         abort(400)
     project_name = request.json.get("project_name")
     id = projects_id_counter + 1
@@ -99,7 +99,7 @@ def create_project():
 
 @app.errorhandler(400)
 def bad_request(error):
-    return make_response(jsonify("You need to name the project."), 400)
+    return make_response(jsonify("The request is incomplete."), 400)
 
 @app.route("/projects/<int:id>", methods=["PUT"])
 def modify_project(id):
@@ -126,6 +126,12 @@ def get_tasks_from_a_project(id):
 
 @app.route("/projects/<int:id>/tasks", methods=["POST"])
 def post_task(id):
+    if not "task_name" in request.json:
+        abort(400)
+
+    if not "description" in request.json:
+        abort(400)
+
     for project in projects:
         if project["id"] == id:
             task_name = request.json.get("task_name")
@@ -134,6 +140,16 @@ def post_task(id):
             task = {"task_name": task_name, "id": id, "description": description}
             project["tasks"].append(task)
             return jsonify({project["project_name"]: project["tasks"]})
+
+@app.route("/projects/<int:id>/tasks/<int:task_id>", methods=["DELETE"])
+def delete_task(id, task_id):
+    for project in projects:
+        if project["id"] == id:
+            for task in project["tasks"]:
+                if task["task_id"] == task_id:
+                    project["tasks"].remove(task)
+                    return jsonify({"task_state": "Deleted"})
+    abort(404)
 
 if __name__ == "__main__":
     app.run(debug=True)
