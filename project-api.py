@@ -151,5 +151,16 @@ def delete_task(id, task_id):
                     return jsonify({"task_state": "Deleted"})
     abort(404)
 
+@app.route("/projects/<int:id>/tasks/<int:task_id>", methods=["PUT"])
+def modify_task(id, task_id):
+    for project in projects:
+        if project["id"] == id:
+            for task in project["tasks"]:
+                if task["task_id"] == task_id:
+                    task["task_name"] = request.json.get("task_name", task["task_name"])
+                    task["description"] = request.json.get("description", task["description"])
+                    return jsonify({"task_modified": task})
+    abort(404)
+
 if __name__ == "__main__":
     app.run(debug=True)
