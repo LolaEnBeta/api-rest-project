@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, abort, make_response, request
 
+projects_id_counter = 3
+
 projects = [
     {
         "project_name": "First Project",
@@ -88,7 +90,7 @@ def create_project():
     if not request.json or not "ProjectName" in request.json:
         abort(400)
     project_name = request.json.get("project_name")
-    id = projects[-1].get("id") + 1
+    id = projects_id_counter + 1
     state = "In progress"
     tasks = []
     project = {"project_name": project_name, "id": id, "state": state, "tasks": tasks}
