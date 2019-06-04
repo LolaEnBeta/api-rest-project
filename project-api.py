@@ -1,7 +1,9 @@
 from flask import Flask, jsonify, abort, make_response, request
+from Project import Project
 
-projects_id_counter = 3
+projects_id_counter = 0
 
+'''
 projects = [
     {
         "project_name": "First Project",
@@ -55,6 +57,9 @@ projects = [
         ]
     }
 ]
+'''
+
+projects = []
 
 app = Flask(__name__)
 
@@ -64,13 +69,16 @@ def index():
 
 @app.route("/projects", methods=["GET"])
 def get_projects():
-    return jsonify({"projects": projects})
+    response = []
+    for project in projects:
+        response.append(project.to_json())
+    return jsonify({"projects": response})
 
 @app.route("/projects/<int:id>", methods=["GET"])
 def get_project_by_id(id):
     for project in projects:
-        if project["id"] == id:
-            return jsonify({"project": project})
+        if project.id == id:
+            return jsonify({"project": project.to_json()})
     abort(404)
 
 @app.errorhandler(404)
@@ -80,22 +88,23 @@ def not_found(error):
 @app.route("/projects/<int:id>", methods=["DELETE"])
 def delete_project(id):
     for project in projects:
-        if project["id"] == id:
+        if project.id == id:
             projects.remove(project)
             return jsonify({"project_state": "Deleted"})
     abort(404)
 
 @app.route("/projects", methods=["POST"])
 def create_project():
+    global projects_id_counter
+
     if not request.json or not "project_name" in request.json:
         abort(400)
     project_name = request.json.get("project_name")
-    id = projects_id_counter + 1
+    projects_id_counter += 1
     state = "In progress"
-    tasks = []
-    project = {"project_name": project_name, "id": id, "state": state, "tasks": tasks}
+    project = Project(projects_id_counter, project_name, state)
     projects.append(project)
-    return jsonify({"created_new_project": project})
+    return jsonify({"created_new_project": project.to_json()})
 
 @app.errorhandler(400)
 def bad_request(error):
@@ -104,10 +113,10 @@ def bad_request(error):
 @app.route("/projects/<int:id>", methods=["PUT"])
 def modify_project(id):
     for project in projects:
-        if project["id"] == id:
-            project["project_name"] = request.json.get("project_name", project["project_name"])
-            project["state"] = request.json.get("state", project["state"])
-            return jsonify({"project_modified": project})
+        if project.id == id:
+            project.name = request.json.get("project_name", project.name)
+            project.state = request.json.get("state", project.state)
+            return jsonify({"project_modified": project.to_json()})
     abort(404)
 
 @app.route("/projects/tasks", methods=["GET"])
