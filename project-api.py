@@ -1,7 +1,9 @@
 from flask import Flask, jsonify, abort, make_response, request
 from Project import Project
+from Task import Task
 
 projects_id_counter = 0
+tasks_id_counter = 0
 
 '''
 projects = [
@@ -129,12 +131,14 @@ def get_all_tasks():
 @app.route("/projects/<int:id>/tasks", methods=["GET"])
 def get_tasks_from_a_project(id):
     for project in projects:
-        if project["id"] == id:
-            return jsonify({project["project_name"]: project["tasks"]})
+        if project.id == id:
+            return jsonify({project.name: project.tasks})
     abort(404)
 
 @app.route("/projects/<int:id>/tasks", methods=["POST"])
 def post_task(id):
+    global tasks_id_counter
+
     if not "task_name" in request.json:
         abort(400)
 
@@ -142,13 +146,13 @@ def post_task(id):
         abort(400)
 
     for project in projects:
-        if project["id"] == id:
+        if project.id == id:
             task_name = request.json.get("task_name")
-            id = project["tasks"][-1].get("id") + 1
+            tasks_id_counter += 1
             description = request.json.get("description")
-            task = {"task_name": task_name, "id": id, "description": description}
-            project["tasks"].append(task)
-            return jsonify({project["project_name"]: project["tasks"]})
+            task = Task(tasks_id_counter, task_name, description)
+            project.add_task(task)
+            return jsonify({project.name: task.to_json()})
 
 @app.route("/projects/<int:id>/tasks/<int:task_id>", methods=["DELETE"])
 def delete_task(id, task_id):
